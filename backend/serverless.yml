@@ -1,0 +1,53 @@
+service: isp-billing-system
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-southeast-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 30
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
+    COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}
+    COGNITO_REGION: ${env:COGNITO_REGION, 'ap-southeast-1'}
+    MIKROTIK_HOST: ${env:MIKROTIK_HOST}
+    MIKROTIK_PORT: ${env:MIKROTIK_PORT, '8728'}
+    MIKROTIK_USER: ${env:MIKROTIK_USER}
+    MIKROTIK_PASSWORD: ${env:MIKROTIK_PASSWORD}
+    SMS_API_KEY: ${env:SMS_API_KEY}
+    S3_BUCKET: ${env:S3_BUCKET}
+    FRONTEND_URL: ${env:FRONTEND_URL}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource: 'arn:aws:s3:::${env:S3_BUCKET}/*'
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminAddUserToGroup
+            - cognito-idp:AdminRemoveUserFromGroup
+            - cognito-idp:AdminUpdateUserAttributes
+          Resource: '*'
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+    noPrependStageInUrl: true
+
+functions: {}
