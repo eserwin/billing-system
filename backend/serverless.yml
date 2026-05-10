@@ -21,6 +21,13 @@ provider:
     SMS_API_KEY: ${env:SMS_API_KEY}
     S3_BUCKET: ${env:S3_BUCKET}
     FRONTEND_URL: ${env:FRONTEND_URL}
+    NODE_ENV: ${opt:stage, 'dev'}
+  vpc:
+    securityGroupIds:
+      - ${env:VPC_SECURITY_GROUP_ID}
+    subnetIds:
+      - ${env:VPC_SUBNET_ID_1}
+      - ${env:VPC_SUBNET_ID_2}
   iam:
     role:
       statements:
@@ -40,6 +47,20 @@ provider:
             - cognito-idp:AdminAddUserToGroup
             - cognito-idp:AdminRemoveUserFromGroup
             - cognito-idp:AdminUpdateUserAttributes
+            - cognito-idp:AdminGetUser
+            - cognito-idp:ListUsers
+          Resource: 'arn:aws:cognito-idp:${self:provider.region}:*:userpool/${env:COGNITO_USER_POOL_ID}'
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: 'arn:aws:logs:${self:provider.region}:*:*'
+        - Effect: Allow
+          Action:
+            - ec2:CreateNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+            - ec2:DeleteNetworkInterface
           Resource: '*'
 
 plugins:
@@ -49,5 +70,496 @@ custom:
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true
+  corsConfig:
+    origin: ${env:FRONTEND_URL, '*'}
+    headers:
+      - Content-Type
+      - Authorization
+      - X-Amz-Date
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: true
 
-functions: {}
+functions:
+  # ─── Customer Management ────────────────────────────────────────────
+  customerCreate:
+    handler: src/handlers/customers/create.main
+    events:
+      - http:
+          path: api/v1/customers
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  customerUpdate:
+    handler: src/handlers/customers/update.main
+    events:
+      - http:
+          path: api/v1/customers/{id}
+          method: put
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  customerList:
+    handler: src/handlers/customers/list.main
+    events:
+      - http:
+          path: api/v1/customers
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  customerGet:
+    handler: src/handlers/customers/get.main
+    events:
+      - http:
+          path: api/v1/customers/{id}
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  customerArchive:
+    handler: src/handlers/customers/archive.main
+    events:
+      - http:
+          path: api/v1/customers/{id}
+          method: delete
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  customerRestore:
+    handler: src/handlers/customers/restore.main
+    events:
+      - http:
+          path: api/v1/customers/{id}/restore
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  # ─── Internet Plan Management ───────────────────────────────────────
+  planCreate:
+    handler: src/handlers/plans/create.main
+    events:
+      - http:
+          path: api/v1/plans
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  planUpdate:
+    handler: src/handlers/plans/update.main
+    events:
+      - http:
+          path: api/v1/plans/{id}
+          method: put
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  planList:
+    handler: src/handlers/plans/list.main
+    events:
+      - http:
+          path: api/v1/plans
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  planToggleStatus:
+    handler: src/handlers/plans/toggleStatus.main
+    events:
+      - http:
+          path: api/v1/plans/{id}/status
+          method: patch
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  # ─── Billing and Invoice Management ─────────────────────────────────
+  billingGenerate:
+    handler: src/handlers/billing/generate.main
+    events:
+      - http:
+          path: api/v1/billing/generate
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  billingList:
+    handler: src/handlers/billing/list.main
+    events:
+      - http:
+          path: api/v1/billing
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  billingGet:
+    handler: src/handlers/billing/get.main
+    events:
+      - http:
+          path: api/v1/billing/{id}
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  billingExportPdf:
+    handler: src/handlers/billing/exportPdf.main
+    memorySize: 512
+    events:
+      - http:
+          path: api/v1/billing/{id}/pdf
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  billingSummary:
+    handler: src/handlers/billing/summary.main
+    events:
+      - http:
+          path: api/v1/billing/summary
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  # ─── Payment Management ─────────────────────────────────────────────
+  paymentRecord:
+    handler: src/handlers/payments/record.main
+    events:
+      - http:
+          path: api/v1/payments
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  paymentList:
+    handler: src/handlers/payments/list.main
+    events:
+      - http:
+          path: api/v1/payments
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  paymentGet:
+    handler: src/handlers/payments/get.main
+    events:
+      - http:
+          path: api/v1/payments/{id}
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  # ─── Customer Status (Scheduled) ────────────────────────────────────
+  dailyStatusCheck:
+    handler: src/handlers/status/dailyCheck.main
+    timeout: 120
+    events:
+      - schedule:
+          rate: cron(0 16 * * ? *)
+          description: 'Daily customer status check (00:00 Manila / 16:00 UTC)'
+          enabled: true
+
+  # ─── MikroTik Integration ───────────────────────────────────────────
+  mikrotikDisconnect:
+    handler: src/handlers/mikrotik/disconnect.main
+    events:
+      - http:
+          path: api/v1/mikrotik/disconnect/{id}
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  mikrotikReconnect:
+    handler: src/handlers/mikrotik/reconnect.main
+    events:
+      - http:
+          path: api/v1/mikrotik/reconnect/{id}
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  mikrotikSyncStatus:
+    handler: src/handlers/mikrotik/syncStatus.main
+    events:
+      - http:
+          path: api/v1/mikrotik/sync
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  mikrotikSessions:
+    handler: src/handlers/mikrotik/sessions.main
+    events:
+      - http:
+          path: api/v1/mikrotik/sessions
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  mikrotikGetSettings:
+    handler: src/handlers/mikrotik/getSettings.main
+    events:
+      - http:
+          path: api/v1/mikrotik/settings
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  mikrotikUpdateSettings:
+    handler: src/handlers/mikrotik/updateSettings.main
+    events:
+      - http:
+          path: api/v1/mikrotik/settings
+          method: put
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  # ─── Notifications ──────────────────────────────────────────────────
+  notificationSend:
+    handler: src/handlers/notifications/send.main
+    events:
+      - http:
+          path: api/v1/notifications/send
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  notificationLogs:
+    handler: src/handlers/notifications/logs.main
+    events:
+      - http:
+          path: api/v1/notifications/logs
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  scheduledReminders:
+    handler: src/handlers/notifications/scheduledReminders.main
+    timeout: 120
+    events:
+      - schedule:
+          rate: cron(0 0 * * ? *)
+          description: 'Daily notification reminders (08:00 Manila / 00:00 UTC)'
+          enabled: true
+
+  # ─── Reports and Dashboard ──────────────────────────────────────────
+  reportDashboard:
+    handler: src/handlers/reports/dashboard.main
+    events:
+      - http:
+          path: api/v1/reports/dashboard
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  reportCollections:
+    handler: src/handlers/reports/collections.main
+    events:
+      - http:
+          path: api/v1/reports/collections
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  reportMonthly:
+    handler: src/handlers/reports/monthly.main
+    events:
+      - http:
+          path: api/v1/reports/monthly
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  # ─── User Management ────────────────────────────────────────────────
+  userCreate:
+    handler: src/handlers/users/create.main
+    events:
+      - http:
+          path: api/v1/users
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  userUpdate:
+    handler: src/handlers/users/update.main
+    events:
+      - http:
+          path: api/v1/users/{id}
+          method: put
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  userList:
+    handler: src/handlers/users/list.main
+    events:
+      - http:
+          path: api/v1/users
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  userActivityLogs:
+    handler: src/handlers/users/activityLogs.main
+    events:
+      - http:
+          path: api/v1/users/{id}/activity
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+resources:
+  Resources:
+    # ─── Cognito Authorizer ──────────────────────────────────────────
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: CognitoAuthorizer-${self:provider.stage}
+        Type: COGNITO_USER_POOLS
+        IdentitySource: method.request.header.Authorization
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ProviderARNs:
+          - arn:aws:cognito-idp:${self:provider.region}:${aws:accountId}:userpool/${env:COGNITO_USER_POOL_ID}
+
+    # ─── S3 Bucket for Documents/PDFs ────────────────────────────────
+    DocumentsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+              AllowedOrigins:
+                - ${env:FRONTEND_URL, '*'}
+              MaxAge: 3600
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    # ─── API Gateway Default 4xx/5xx CORS Response ───────────────────
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:FRONTEND_URL, '*'}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:FRONTEND_URL, '*'}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: ApiGatewayRestApi

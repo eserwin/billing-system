@@ -5,9 +5,202 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ISP Billing System</title>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: 'Roboto', sans-serif; }
+      .shell-sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+        background: linear-gradient(180deg, #1a237e 0%, #0d1b4a 100%);
+        color: white; z-index: 9999; display: flex; flex-direction: column;
+        overflow-y: auto;
+      }
+      .shell-sidebar-header {
+        padding: 20px 16px; display: flex; align-items: center; gap: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .shell-sidebar-header .logo {
+        width: 36px; height: 36px; background: rgba(255,255,255,0.15);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      }
+      .shell-sidebar-header .logo .mdi { font-size: 20px; }
+      .shell-sidebar-header .text h3 { font-size: 14px; font-weight: 600; margin: 0; }
+      .shell-sidebar-header .text small { font-size: 11px; color: rgba(255,255,255,0.6); }
+      .shell-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; }
+      .shell-nav a {
+        display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+        color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px;
+        border-radius: 8px; transition: all 0.15s;
+      }
+      .shell-nav a:hover { background: rgba(255,255,255,0.1); color: white; }
+      .shell-nav a.active { background: #1976d2; color: white; font-weight: 500; }
+      .shell-nav a .mdi { font-size: 20px; width: 24px; text-align: center; }
+      .shell-user {
+        padding: 16px; border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; gap: 10px;
+      }
+      .shell-user .avatar {
+        width: 36px; height: 36px; border-radius: 50%; background: #1976d2;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 600;
+      }
+      .shell-user .info .name { font-size: 13px; font-weight: 500; }
+      .shell-user .info .email { font-size: 11px; color: rgba(255,255,255,0.5); }
+      .shell-topbar {
+        position: fixed; top: 0; left: 240px; right: 0; height: 56px;
+        background: white; border-bottom: 1px solid #e0e0e0; z-index: 9998;
+        display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+      }
+      .shell-topbar .left { display: flex; align-items: center; gap: 12px; }
+      .shell-topbar .left .mdi-menu { font-size: 22px; color: #555; cursor: pointer; }
+      .shell-topbar .page-title { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+      .shell-topbar .right { display: flex; align-items: center; gap: 16px; }
+      .shell-topbar .right .icon-btn {
+        position: relative; width: 36px; height: 36px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: #555;
+      }
+      .shell-topbar .right .icon-btn:hover { background: #f5f5f5; }
+      .shell-topbar .right .badge {
+        position: absolute; top: 2px; right: 2px; width: 16px; height: 16px;
+        background: #f44336; color: white; border-radius: 50%; font-size: 9px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .shell-topbar .right .datetime { font-size: 12px; color: #888; }
+      .shell-topbar .right .user-chip {
+        display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px;
+        border-radius: 20px; background: #f5f5f5; cursor: pointer;
+      }
+      .shell-topbar .right .user-chip .avatar {
+        width: 28px; height: 28px; border-radius: 50%; background: #1976d2;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 11px; font-weight: 600;
+      }
+      .shell-topbar .right .user-chip span { font-size: 13px; color: #333; }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Sidebar -->
+    <div class="shell-sidebar">
+      <div class="shell-sidebar-header">
+        <div class="logo"><span class="mdi mdi-access-point-network"></span></div>
+        <div class="text">
+          <h3>ISP Billing System</h3>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+      <nav class="shell-nav" id="sidebar-nav"></nav>
+      <div class="shell-user">
+        <div class="avatar" id="sidebar-avatar">SA</div>
+        <div class="info">
+          <div class="name" id="sidebar-username">Super Admin</div>
+          <div class="email" id="sidebar-email">superadmin@isp.com</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="shell-topbar">
+      <div class="left">
+        <span class="mdi mdi-menu"></span>
+        <span class="page-title" id="page-title">Dashboard</span>
+      </div>
+      <div class="right">
+        <div class="icon-btn"><span class="mdi mdi-bell-outline"></span><span class="badge">5</span></div>
+        <div class="icon-btn"><span class="mdi mdi-email-outline"></span><span class="badge">3</span></div>
+        <span class="datetime" id="datetime"></span>
+        <div class="user-chip">
+          <div class="avatar">SA</div>
+          <span>Super Admin</span>
+          <span class="mdi mdi-chevron-down" style="font-size:16px;color:#888;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div id="app" style="margin-left:240px;margin-top:56px;min-height:calc(100vh - 56px);background:#f5f7fa;"></div>
+
+    <script>
+      // Navigation items
+      const navItems = [
+        { title: 'Dashboard', path: '/', icon: 'mdi-view-dashboard' },
+        { title: 'Customers', path: '/customers', icon: 'mdi-account-group' },
+        { title: 'Billing & Invoices', path: '/billing', icon: 'mdi-receipt-text' },
+        { title: 'Payments', path: '/payments', icon: 'mdi-cash-multiple' },
+        { title: 'Internet Plans', path: '/plans', icon: 'mdi-wifi' },
+        { title: 'MikroTik Integration', path: '/mikrotik', icon: 'mdi-router-wireless' },
+        { title: 'Notifications', path: '/notifications', icon: 'mdi-bell' },
+        { title: 'Reports', path: '/reports', icon: 'mdi-chart-bar' },
+        { title: 'Users & Roles', path: '/users', icon: 'mdi-account-cog' },
+        { title: 'Settings', path: '/settings', icon: 'mdi-cog' },
+      ];
+
+      // Page titles map
+      const pageTitles = { '/': 'Dashboard', '/customers': 'Customers', '/billing': 'Billing & Invoices', '/payments': 'Payments', '/plans': 'Internet Plans', '/mikrotik': 'MikroTik Integration', '/notifications': 'Notifications', '/reports': 'Reports', '/users': 'Users & Roles', '/settings': 'Settings' };
+
+      const nav = document.getElementById('sidebar-nav');
+      const pageTitle = document.getElementById('page-title');
+
+      function updateActive(path) {
+        nav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+        const active = nav.querySelector(`a[data-path="${path}"]`);
+        if (active) active.classList.add('active');
+        pageTitle.textContent = pageTitles[path] || 'Dashboard';
+      }
+
+      navItems.forEach(item => {
+        const a = document.createElement('a');
+        a.innerHTML = `<span class="mdi ${item.icon}"></span>${item.title}`;
+        a.href = item.path;
+        a.dataset.path = item.path;
+        if (window.location.pathname === item.path) a.classList.add('active');
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.history.pushState({}, '', item.path);
+          window.dispatchEvent(new PopStateEvent('popstate'));
+          updateActive(item.path);
+        });
+        nav.appendChild(a);
+      });
+
+      window.addEventListener('popstate', () => updateActive(window.location.pathname));
+
+      // Listen for Vue Router navigation (pushState doesn't fire popstate)
+      const origPushState = history.pushState;
+      history.pushState = function() {
+        origPushState.apply(this, arguments);
+        updateActive(window.location.pathname);
+        pageTitle.textContent = pageTitles[window.location.pathname] || 'Dashboard';
+      };
+
+      // DateTime
+      function updateTime() {
+        const now = new Date();
+        document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      }
+      updateTime();
+      setInterval(updateTime, 60000);
+
+      // Sync sidebar profile with logged-in user
+      function updateSidebarProfile() {
+        try {
+          const stored = localStorage.getItem('isp_user');
+          const user = stored ? JSON.parse(stored) : { name: 'Dev Admin', email: 'admin@isp.local', role: 'SuperAdmin' };
+          const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+          document.getElementById('sidebar-avatar').textContent = initials;
+          document.getElementById('sidebar-username').textContent = user.name;
+          document.getElementById('sidebar-email').textContent = user.email;
+          // Also update topbar
+          const topAvatar = document.querySelector('.shell-topbar .user-chip .avatar');
+          const topName = document.querySelector('.shell-topbar .user-chip span:not(.mdi)');
+          if (topAvatar) topAvatar.textContent = initials;
+          if (topName) topName.textContent = user.name;
+        } catch(e) {}
+      }
+      updateSidebarProfile();
+      // Re-check periodically in case auth store updates it
+      setInterval(updateSidebarProfile, 2000);
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
