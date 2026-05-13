@@ -1,11 +1,11 @@
 <template>
   <v-container fluid>
     <v-row class="mb-4" align="center">
-      <v-col>
-        <h1 class="text-h4">Customers</h1>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'CustomerCreate' }">
+      <v-col cols="12" sm="auto" class="d-flex justify-end">
+        <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'CustomerCreate' }" block class="d-sm-none">
+          Add Customer
+        </v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'CustomerCreate' }" class="d-none d-sm-flex">
           Add Customer
         </v-btn>
       </v-col>

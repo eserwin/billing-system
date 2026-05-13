@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-main style="--v-layout-left: 0px; --v-layout-top: 0px;">
+    <v-main class="app-main">
       <router-view />
     </v-main>
   </v-app>
@@ -8,3 +8,10 @@
 
 <script setup lang="ts">
 </script>
+
+<style scoped>
+.app-main {
+  --v-layout-left: 0px;
+  --v-layout-top: 0px;
+}
+</style>

@@ -1,7 +1,6 @@
 <template>
   <v-container fluid>
     <div class="d-flex align-center mb-6">
-      <h1 class="text-h4">Overdue Accounts</h1>
       <v-spacer />
       <v-btn color="primary" variant="outlined" @click="loadReport" :loading="loading">
         <v-icon start>mdi-refresh</v-icon>

@@ -1,9 +1,5 @@
 <template>
   <v-container fluid>
-    <div class="d-flex align-center mb-6">
-      <h1 class="text-h4">Monthly Income Report</h1>
-    </div>
-
     <!-- Year Filter -->
     <v-card class="mb-6">
       <v-card-text>

@@ -5,6 +5,7 @@
   "main": "src/handlers/index.ts",
   "scripts": {
     "dev": "serverless offline",
+    "dev:mock": "tsx src/devServer.ts",
     "deploy": "serverless deploy",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -30,7 +31,7 @@
     "@types/node": "^20.11.0",
     "@types/uuid": "^9.0.0",
     "fast-check": "^3.15.0",
-    "serverless": "^4.35.1",
+    "serverless": "^3.40.0",
     "serverless-offline": "^14.4.0",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"

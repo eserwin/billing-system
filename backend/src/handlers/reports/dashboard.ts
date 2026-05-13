@@ -3,7 +3,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { authMiddleware } from '../../middlewares/auth';
 import { roleGuard } from '../../middlewares/roleGuard';
 import { errorHandler } from '../../middlewares/errorHandler';
-import { getDashboardMetrics } from '../../services/reportService';
+import { reportService } from '../../services';
+
+const { getDashboardMetrics } = reportService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

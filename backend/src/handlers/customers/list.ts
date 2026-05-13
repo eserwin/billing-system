@@ -5,7 +5,10 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { customerListQuerySchema } from '../../validators/customerSchema';
-import { listCustomers, CustomerFilters } from '../../services/customerService';
+import { customerService } from '../../services';
+
+const { listCustomers } = customerService;
+type CustomerFilters = { status?: string; service_area?: string; plan_id?: string; search?: string };
 import { httpResponse, paginatedResponse } from '../../utils/response';
 import { parsePaginationParams } from '../../utils/pagination';
 import { UserRole } from '../../types/common';

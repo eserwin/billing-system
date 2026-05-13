@@ -5,7 +5,10 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { planListQuerySchema } from '../../validators/planSchema';
-import { listPlans, PlanFilters } from '../../services/planService';
+import { planService } from '../../services';
+
+const { listPlans } = planService;
+type PlanFilters = { is_active?: string; search?: string };
 import { httpResponse, paginatedResponse } from '../../utils/response';
 import { parsePaginationParams } from '../../utils/pagination';
 import { UserRole } from '../../types/common';

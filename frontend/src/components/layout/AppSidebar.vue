@@ -2,25 +2,17 @@
   <v-navigation-drawer
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    :rail="rail"
-    permanent
+    :temporary="mobile"
+    :permanent="!mobile"
     width="260"
     color="grey-darken-4"
     theme="dark"
   >
-    <v-list-item
-      :prepend-icon="rail ? undefined : undefined"
-      class="pa-4"
-    >
-      <template v-if="!rail">
-        <v-list-item-title class="text-h6 font-weight-bold">
-          ISP Billing
-        </v-list-item-title>
-        <v-list-item-subtitle>Management System</v-list-item-subtitle>
-      </template>
-      <template v-else>
-        <v-list-item-title class="text-center font-weight-bold">ISP</v-list-item-title>
-      </template>
+    <v-list-item class="pa-4">
+      <v-list-item-title class="text-h6 font-weight-bold">
+        ISP Billing
+      </v-list-item-title>
+      <v-list-item-subtitle>Management System</v-list-item-subtitle>
     </v-list-item>
 
     <v-divider />
@@ -34,6 +26,7 @@
         :to="item.to"
         :value="item.title"
         rounded="xl"
+        @click="onNavClick"
       />
     </v-list>
   </v-navigation-drawer>
@@ -41,17 +34,19 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useAuthStore } from '@/stores/auth';
 
 defineProps<{
   modelValue: boolean;
-  rail: boolean;
+  rail?: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   'update:modelValue': [value: boolean];
 }>();
 
+const { mobile } = useDisplay();
 const authStore = useAuthStore();
 
 interface NavItem {
@@ -78,4 +73,11 @@ const visibleItems = computed(() => {
   const role = authStore.userRole || 'SuperAdmin';
   return navItems.filter((item) => item.roles.includes(role));
 });
+
+function onNavClick() {
+  // Close drawer on mobile after navigation
+  if (mobile.value) {
+    emit('update:modelValue', false);
+  }
+}
 </script>

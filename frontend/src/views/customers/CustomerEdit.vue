@@ -5,7 +5,6 @@
         <v-btn variant="text" prepend-icon="mdi-arrow-left" :to="{ name: 'Customers' }">
           Back to Customers
         </v-btn>
-        <h1 class="text-h4 mt-2">Edit Customer</h1>
       </v-col>
     </v-row>
 

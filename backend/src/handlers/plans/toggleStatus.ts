@@ -6,7 +6,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { planIdParamSchema, togglePlanStatusSchema } from '../../validators/planSchema';
-import { togglePlanStatus } from '../../services/planService';
+import { planService } from '../../services';
+
+const { togglePlanStatus } = planService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

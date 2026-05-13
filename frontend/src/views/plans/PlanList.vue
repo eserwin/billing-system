@@ -1,11 +1,11 @@
 <template>
   <v-container fluid>
     <v-row class="mb-4" align="center">
-      <v-col>
-        <h1 class="text-h4">Internet Plans</h1>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreateDialog">
+      <v-col cols="12" sm="auto" class="d-flex justify-end">
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreateDialog" block class="d-sm-none">
+          Add Plan
+        </v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreateDialog" class="d-none d-sm-flex">
           Add Plan
         </v-btn>
       </v-col>

@@ -5,7 +5,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { invoiceIdParamSchema } from '../../validators/billingSchema';
-import { exportPdf } from '../../services/billingService';
+import { billingService } from '../../services';
+
+const { exportPdf } = billingService;
 import { UserRole } from '../../types/common';
 
 async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {

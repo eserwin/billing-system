@@ -5,7 +5,6 @@
         <v-btn variant="text" prepend-icon="mdi-arrow-left" :to="{ name: 'Payments' }">
           Back to Payments
         </v-btn>
-        <h1 class="text-h4 mt-2">Record Payment</h1>
       </v-col>
     </v-row>
 

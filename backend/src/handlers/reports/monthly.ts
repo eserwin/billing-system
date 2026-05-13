@@ -5,7 +5,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { monthlyIncomeQuerySchema } from '../../validators/reportSchema';
-import { getMonthlyIncomeReport } from '../../services/reportService';
+import { reportService } from '../../services';
+
+const { getMonthlyIncomeReport } = reportService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

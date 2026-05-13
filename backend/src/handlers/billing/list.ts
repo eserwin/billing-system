@@ -5,7 +5,10 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { invoiceListQuerySchema } from '../../validators/billingSchema';
-import { listInvoices, InvoiceFilters } from '../../services/billingService';
+import { billingService } from '../../services';
+
+const { listInvoices } = billingService;
+type InvoiceFilters = { status?: string; customer_id?: string; period_year?: string; period_month?: string; search?: string };
 import { httpResponse, paginatedResponse } from '../../utils/response';
 import { parsePaginationParams } from '../../utils/pagination';
 import { UserRole } from '../../types/common';

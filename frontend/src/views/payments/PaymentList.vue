@@ -1,11 +1,11 @@
 <template>
   <v-container fluid>
     <v-row class="mb-4" align="center">
-      <v-col>
-        <h1 class="text-h4">Payments</h1>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'RecordPayment' }">
+      <v-col cols="12" sm="auto" class="d-flex justify-end">
+        <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'RecordPayment' }" block class="d-sm-none">
+          Record Payment
+        </v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'RecordPayment' }" class="d-none d-sm-flex">
           Record Payment
         </v-btn>
       </v-col>

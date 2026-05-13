@@ -6,7 +6,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { generateInvoicesSchema } from '../../validators/billingSchema';
-import { generateMonthlyInvoices } from '../../services/billingService';
+import { billingService } from '../../services';
+
+const { generateMonthlyInvoices } = billingService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

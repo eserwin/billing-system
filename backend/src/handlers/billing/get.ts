@@ -5,7 +5,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { invoiceIdParamSchema } from '../../validators/billingSchema';
-import { getInvoice } from '../../services/billingService';
+import { billingService } from '../../services';
+
+const { getInvoice } = billingService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

@@ -6,7 +6,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { recordPaymentSchema } from '../../validators/paymentSchema';
-import { recordPayment } from '../../services/paymentService';
+import { paymentService } from '../../services';
+
+const { recordPayment } = paymentService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

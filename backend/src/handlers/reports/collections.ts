@@ -5,7 +5,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { collectionReportQuerySchema } from '../../validators/reportSchema';
-import { getCollectionReport } from '../../services/reportService';
+import { reportService } from '../../services';
+
+const { getCollectionReport } = reportService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

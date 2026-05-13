@@ -5,7 +5,9 @@ import { roleGuard } from '../../middlewares/roleGuard';
 import { validator } from '../../middlewares/validator';
 import { errorHandler } from '../../middlewares/errorHandler';
 import { customerIdParamSchema } from '../../validators/customerSchema';
-import { restoreCustomer } from '../../services/customerService';
+import { customerService } from '../../services';
+
+const { restoreCustomer } = customerService;
 import { httpResponse, successResponse } from '../../utils/response';
 import { UserRole } from '../../types/common';
 

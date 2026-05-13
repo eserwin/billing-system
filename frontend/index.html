@@ -13,8 +13,14 @@
         position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
         background: linear-gradient(180deg, #1a237e 0%, #0d1b4a 100%);
         color: white; z-index: 9999; display: flex; flex-direction: column;
-        overflow-y: auto;
+        overflow-y: auto; transition: transform 0.3s ease;
       }
+      .shell-sidebar.closed { transform: translateX(-100%); }
+      .shell-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+        z-index: 9998;
+      }
+      .shell-overlay.visible { display: block; }
       .shell-sidebar-header {
         padding: 20px 16px; display: flex; align-items: center; gap: 12px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -48,13 +54,19 @@
       .shell-user .info .email { font-size: 11px; color: rgba(255,255,255,0.5); }
       .shell-topbar {
         position: fixed; top: 0; left: 240px; right: 0; height: 56px;
-        background: white; border-bottom: 1px solid #e0e0e0; z-index: 9998;
-        display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+        background: white; border-bottom: 1px solid #e0e0e0; z-index: 9997;
+        display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+        transition: left 0.3s ease;
       }
       .shell-topbar .left { display: flex; align-items: center; gap: 12px; }
-      .shell-topbar .left .mdi-menu { font-size: 22px; color: #555; cursor: pointer; }
-      .shell-topbar .page-title { font-size: 18px; font-weight: 600; color: #1a1a1a; }
-      .shell-topbar .right { display: flex; align-items: center; gap: 16px; }
+      .shell-topbar .left .menu-btn {
+        font-size: 22px; color: #555; cursor: pointer; display: none;
+        width: 40px; height: 40px; border-radius: 50%;
+        align-items: center; justify-content: center; border: none; background: none;
+      }
+      .shell-topbar .left .menu-btn:hover { background: #f5f5f5; }
+      .shell-topbar .page-title { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+      .shell-topbar .right { display: flex; align-items: center; gap: 12px; }
       .shell-topbar .right .icon-btn {
         position: relative; width: 36px; height: 36px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
@@ -77,11 +89,54 @@
         color: white; font-size: 11px; font-weight: 600;
       }
       .shell-topbar .right .user-chip span { font-size: 13px; color: #333; }
+      .chevron-icon { font-size: 16px; color: #888; }
+      .app-content {
+        margin-left: 240px; margin-top: 56px;
+        min-height: calc(100vh - 56px); background: #f5f7fa;
+        transition: margin-left 0.3s ease;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 960px) {
+        .shell-sidebar { transform: translateX(-100%); }
+        .shell-sidebar.open { transform: translateX(0); }
+        .shell-topbar { left: 0; }
+        .shell-topbar .left .menu-btn { display: flex; }
+        .shell-topbar .right .datetime { display: none; }
+        .shell-topbar .right .user-chip span { display: none; }
+        .app-content { margin-left: 0; }
+      }
+
+      @media (max-width: 600px) {
+        .shell-topbar .right .icon-btn { display: none; }
+        .shell-topbar .page-title { font-size: 14px; }
+        .shell-topbar { padding: 0 12px; }
+        /* Mobile font sizes */
+        body { font-size: 13px; }
+        .v-data-table { font-size: 12px; }
+        .v-card-title { font-size: 14px !important; }
+        .v-chip { font-size: 11px; }
+        .text-h4 { font-size: 1.25rem !important; }
+        .text-h5 { font-size: 1.1rem !important; }
+        .text-h6 { font-size: 0.95rem !important; }
+        .text-subtitle-1 { font-size: 0.85rem !important; }
+        .text-body-1 { font-size: 0.8rem !important; }
+        .text-body-2 { font-size: 0.75rem !important; }
+        .text-caption { font-size: 0.65rem !important; }
+        .v-list-item-title { font-size: 0.8rem !important; }
+        .v-list-item-subtitle { font-size: 0.7rem !important; }
+        .v-btn { font-size: 0.75rem; }
+        .v-text-field input { font-size: 13px; }
+        .v-select .v-field__input { font-size: 13px; }
+      }
     </style>
   </head>
   <body>
+    <!-- Overlay for mobile sidebar -->
+    <div class="shell-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar -->
-    <div class="shell-sidebar">
+    <div class="shell-sidebar" id="shell-sidebar">
       <div class="shell-sidebar-header">
         <div class="logo"><span class="mdi mdi-access-point-network"></span></div>
         <div class="text">
@@ -102,7 +157,7 @@
     <!-- Top Bar -->
     <div class="shell-topbar">
       <div class="left">
-        <span class="mdi mdi-menu"></span>
+        <button class="menu-btn" onclick="toggleSidebar()"><span class="mdi mdi-menu"></span></button>
         <span class="page-title" id="page-title">Dashboard</span>
       </div>
       <div class="right">
@@ -112,15 +167,29 @@
         <div class="user-chip">
           <div class="avatar">SA</div>
           <span>Super Admin</span>
-          <span class="mdi mdi-chevron-down" style="font-size:16px;color:#888;"></span>
+          <span class="mdi mdi-chevron-down chevron-icon"></span>
         </div>
       </div>
     </div>
 
     <!-- App Content -->
-    <div id="app" style="margin-left:240px;margin-top:56px;min-height:calc(100vh - 56px);background:#f5f7fa;"></div>
+    <div id="app" class="app-content"></div>
 
     <script>
+      // Sidebar toggle
+      function toggleSidebar() {
+        const sidebar = document.getElementById('shell-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('visible');
+        } else {
+          sidebar.classList.add('open');
+          overlay.classList.add('visible');
+        }
+      }
+
       // Navigation items
       const navItems = [
         { title: 'Dashboard', path: '/', icon: 'mdi-view-dashboard' },
@@ -135,7 +204,6 @@
         { title: 'Settings', path: '/settings', icon: 'mdi-cog' },
       ];
 
-      // Page titles map
       const pageTitles = { '/': 'Dashboard', '/customers': 'Customers', '/billing': 'Billing & Invoices', '/payments': 'Payments', '/plans': 'Internet Plans', '/mikrotik': 'MikroTik Integration', '/notifications': 'Notifications', '/reports': 'Reports', '/users': 'Users & Roles', '/settings': 'Settings' };
 
       const nav = document.getElementById('sidebar-nav');
@@ -143,9 +211,10 @@
 
       function updateActive(path) {
         nav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-        const active = nav.querySelector(`a[data-path="${path}"]`);
+        const basePath = '/' + path.split('/')[1];
+        const active = nav.querySelector(`a[data-path="${path}"]`) || nav.querySelector(`a[data-path="${basePath}"]`);
         if (active) active.classList.add('active');
-        pageTitle.textContent = pageTitles[path] || 'Dashboard';
+        pageTitle.textContent = pageTitles[path] || pageTitles[basePath] || 'Dashboard';
       }
 
       navItems.forEach(item => {
@@ -153,35 +222,41 @@
         a.innerHTML = `<span class="mdi ${item.icon}"></span>${item.title}`;
         a.href = item.path;
         a.dataset.path = item.path;
-        if (window.location.pathname === item.path) a.classList.add('active');
+        if (window.location.pathname === item.path || window.location.pathname.startsWith(item.path + '/')) a.classList.add('active');
         a.addEventListener('click', (e) => {
           e.preventDefault();
           window.history.pushState({}, '', item.path);
           window.dispatchEvent(new PopStateEvent('popstate'));
           updateActive(item.path);
+          // Close sidebar on mobile
+          if (window.innerWidth <= 960) {
+            document.getElementById('shell-sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('visible');
+          }
         });
         nav.appendChild(a);
       });
 
       window.addEventListener('popstate', () => updateActive(window.location.pathname));
 
-      // Listen for Vue Router navigation (pushState doesn't fire popstate)
       const origPushState = history.pushState;
       history.pushState = function() {
         origPushState.apply(this, arguments);
         updateActive(window.location.pathname);
-        pageTitle.textContent = pageTitles[window.location.pathname] || 'Dashboard';
       };
 
       // DateTime
       function updateTime() {
-        const now = new Date();
-        document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const el = document.getElementById('datetime');
+        if (el) {
+          const now = new Date();
+          el.textContent = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
       }
       updateTime();
       setInterval(updateTime, 60000);
 
-      // Sync sidebar profile with logged-in user
+      // Sync sidebar profile
       function updateSidebarProfile() {
         try {
           const stored = localStorage.getItem('isp_user');
@@ -190,7 +265,6 @@
           document.getElementById('sidebar-avatar').textContent = initials;
           document.getElementById('sidebar-username').textContent = user.name;
           document.getElementById('sidebar-email').textContent = user.email;
-          // Also update topbar
           const topAvatar = document.querySelector('.shell-topbar .user-chip .avatar');
           const topName = document.querySelector('.shell-topbar .user-chip span:not(.mdi)');
           if (topAvatar) topAvatar.textContent = initials;
@@ -198,7 +272,6 @@
         } catch(e) {}
       }
       updateSidebarProfile();
-      // Re-check periodically in case auth store updates it
       setInterval(updateSidebarProfile, 2000);
     </script>
     <script type="module" src="/src/main.ts"></script>

@@ -1,11 +1,11 @@
 <template>
   <v-container fluid>
     <v-row class="mb-4" align="center">
-      <v-col>
-        <h1 class="text-h4">Billing / Invoices</h1>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" prepend-icon="mdi-receipt-text-plus" :loading="store.loading" @click="confirmGenerate">
+      <v-col cols="12" sm="auto" class="d-flex justify-end">
+        <v-btn color="primary" prepend-icon="mdi-receipt-text-plus" :loading="store.loading" @click="confirmGenerate" block class="d-sm-none">
+          Generate Billing
+        </v-btn>
+        <v-btn color="primary" prepend-icon="mdi-receipt-text-plus" :loading="store.loading" @click="confirmGenerate" class="d-none d-sm-flex">
           Generate Billing
         </v-btn>
       </v-col>

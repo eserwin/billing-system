@@ -10,6 +10,13 @@
 - Pinia (state management)
 - Vue Router 4
 
+### CSS & Styling Rules
+- All CSS must be in external files (e.g., `.css`, `.scss`) or in `<style>` blocks within `.vue` SFCs
+- NO inline styles in HTML templates (no `style="..."` attributes)
+- Use Vuetify utility classes or scoped `<style>` blocks for component styling
+- Shared styles go in `src/assets/` directory
+- Use CSS variables for theming when possible
+
 ### Libraries
 - Axios (HTTP client with interceptors for auth)
 - amazon-cognito-identity-js (Cognito authentication SDK)
